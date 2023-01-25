@@ -22,13 +22,10 @@ class Server {
     this.app = express();
     this.port = process.env.PORT || '8000';
 
-    //Conectar a base de datos
     this.dbConnection();
 
-    //Definir middlewares
     this.milddlewares();
 
-    //Definir rutas
     this.routes();
   }
 
@@ -43,15 +40,10 @@ class Server {
     }
   }
 
-  //Son funciones que se ejecutan antes de que lleguen a las rutas
   milddlewares() {
     //CORS
     this.app.use(cors());
-
-    //Lectura y parseo del body
     this.app.use(express.json());
-
-    //Directorio publico
     this.app.use(express.static('public'));
   }
 
