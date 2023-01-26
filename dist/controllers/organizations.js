@@ -21,7 +21,9 @@ const getOrganizations = (req, res) => __awaiter(void 0, void 0, void 0, functio
 exports.getOrganizations = getOrganizations;
 const getOrganization = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const organization = yield organization_1.default.findOne({ where: { id_organizacion: id, status: 1 } });
+    const organization = yield organization_1.default.findOne({
+        where: { id_organizacion: id, status: 1 },
+    });
     if (organization) {
         res.json(organization);
     }
@@ -37,12 +39,12 @@ const postOrganizacion = (req, res) => __awaiter(void 0, void 0, void 0, functio
         const { body } = req;
         const existeNombre = yield organization_1.default.findOne({
             where: {
-                name: body.name
-            }
+                name: body.name,
+            },
         });
         if (existeNombre) {
             return res.status(400).json({
-                msg: 'Ya existe una organización con el nombre ' + body.name
+                msg: 'Ya existe una organización con el nombre ' + body.name,
             });
         }
         const organizacion = organization_1.default.build(body);
@@ -52,7 +54,7 @@ const postOrganizacion = (req, res) => __awaiter(void 0, void 0, void 0, functio
     catch (error) {
         console.log(error);
         res.status(500).json({
-            msg: 'Hable con el administrador'
+            msg: 'Hable con el administrador',
         });
     }
 });
@@ -61,10 +63,12 @@ const putOrganizacion = (req, res) => __awaiter(void 0, void 0, void 0, function
     const { id } = req.params;
     const { body } = req;
     try {
-        const organizacion = yield organization_1.default.findOne({ where: { id_organizacion: id, status: 1 } });
+        const organizacion = yield organization_1.default.findOne({
+            where: { id_organizacion: id, status: 1 },
+        });
         if (!organizacion) {
             return res.status(404).json({
-                msg: 'No existe una organización con el id ' + id
+                msg: 'No existe una organización con el id ' + id,
             });
         }
         yield organizacion.update(body);
@@ -73,7 +77,7 @@ const putOrganizacion = (req, res) => __awaiter(void 0, void 0, void 0, function
     catch (error) {
         console.log(error);
         res.status(500).json({
-            msg: 'Hable con el administrador'
+            msg: 'Hable con el administrador',
         });
     }
 });
@@ -83,7 +87,7 @@ const deleteOrganizacion = (req, res) => __awaiter(void 0, void 0, void 0, funct
     const organizacion = yield organization_1.default.findByPk(id);
     if (!organizacion) {
         return res.status(404).json({
-            msg: 'No existe una organización con el id ' + id
+            msg: 'No existe una organización con el id ' + id,
         });
     }
     yield organizacion.update({ status: 0 });

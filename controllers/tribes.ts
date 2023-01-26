@@ -1,20 +1,51 @@
-import { Request, Response } from 'express';
-import { Op, Sequelize } from 'sequelize';
-import Trybe from '../models/tribe';
-import Repository  from '../models/repository';
-import Metrics   from '../models/matric';
+import { Request, Response } from "express";
+import { Op } from "sequelize";
+import Trybe from "../models/tribe";
+import axios from "axios";
 
-//sequelize
-export const gerRepositoriesTribes = async (req: Request, res: Response) => {
+import Repository from "../models/repository";
+import Metrics from "../models/matric";
+
+const apiUrl = "http://localhost:8006/api/repositories";
+
+interface ExternalRepositoryData {
+  id: number;
+  state: number;
+}
+
+interface RepositoryData {
+  id_repository: number;
+  name: string;
+  state: string;
+  create_time: Date;
+  status: string;
+  metrics?: any;
+}
+
+interface VerificationStatus {
+  code: number;
+  description: string;
+}
+
+export const getRepositoriesByTribe = async (req: Request, res: Response) => {
   try {
     const { tribeId } = req.params;
-    console.log(tribeId);
-
-    const currentYear = new Date().getFullYear();
-    const repositories = await Repository.findAll({
+    let tribe = await Trybe.findOne({
       where: {
         id_tribe: tribeId,
-        state: 'E',
+      },
+    });
+    if (!tribe) {
+      return res.status(404).json({
+        message: "La Tribu no se encuentra registrada",
+      });
+    }
+    const currentYear = new Date().getFullYear();
+
+    const repositories: RepositoryData[] = await Repository.findAll({
+      where: {
+        id_tribe: tribeId,
+        state: "E",
         create_time: {
           [Op.gte]: new Date(currentYear, 0, 1),
           [Op.lt]: new Date(currentYear + 1, 0, 1),
@@ -30,151 +61,89 @@ export const gerRepositoriesTribes = async (req: Request, res: Response) => {
           },
         },
       ],
-    });
-    res.json(repositories);
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
-  }
-
-};
-
-
-export const tribeExists =  async  (req: Request, res: Response) => {
-  const specificTribeId = req.params.tribeId;
-  const tribe = await Trybe.findOne({
-      where: {
-          id_tribe: specificTribeId
-      }
-  });
-  if (!tribe) {
-      return res.status(404).json({
-          message: 'La Tribu no se encuentra registrada'
+    }).then((repositories) => {
+      return repositories.map((repo) => {
+        return {
+          id_repository: repo.dataValues.id_repository,
+          name: repo.dataValues.name,
+          state: repo.dataValues.state,
+          create_time: repo.dataValues.create_time,
+          status: repo.dataValues.status,
+          metrics: repo.dataValues.metrics,
+        };
       });
+    });
+
+    const { data } = await axios.get<ExternalRepositoryData[]>(apiUrl);
+
+    const repositoriesData = data.filter((r) =>
+      repositories.find((repo) => repo.id_repository === r.id)
+    );
+
+    const updatedRepositories = repositoriesData.map((repo) => {
+      const verificationStatus = verificationStatuses.find((status) => status.code === repo.state);
+      return {
+        ...repo,
+        verificationSate: verificationStatus ? verificationStatus.description : 'Desconocido'
+      }
+    });
+
+    const verificationSate = updatedRepositories[0].verificationSate
+
+    tribe = {
+      ...tribe.dataValues,
+      verificationSate
+    }
+
+    return res.status(200).json({
+      tribe,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error al obtener los repositorios de la tribu",
+      error,
+    });
   }
-  const repositories = await Repository.findAll({
-      include: [{
-          model: Trybe,
-          required: true,
-          where: {
-              id_tribe: specificTribeId
-          }
-      }]
-  });
-  return res.status(200).json(repositories);
 };
 
-// const repositoriPorTribu = async (req: Request, res: Response) => {
-//   //Sequelize
+const verificationStatuses: VerificationStatus[] = [
+  {
+    code: 604,
+    description: "Verificado",
+  },
+  {
+    code: 605,
+    description: "No verificado",
+  },
+  {
+    code: 606,
+    description: "Aprobado",
+  },
+];
 
 
-//   try {
-//     const { id } = req.params;
-
-//     // buscar la tribu en la base de datos
-//     const tribe = await Trybe.findByPk(id);
-
-//     // si la tribu no existe, retornar un error
-//     if (!tribe) {
-//       return res.status(404).json({ error: 'La Tribu no se encuentra registrada' });
-//     }
-
-//     // obtener los repositorios de la tribu
-//     const query = `
-//         SELECT r.name, r.coverage
-//         FROM repositories r
-//         WHERE r.id_tribe = :id AND r.state = 'E' AND r.create_time >= :year
-//     `;
-//     const repositories = await sequelize.query(query, {
-//       replacements: { id: id, year: new Date().getFullYear() + "-01-01" },
-//       type: sequelize.QueryTypes.SELECT
-//     });
-
-//     // si no se encuentran repositorios, retornar un error
-//     if (repositories.length === 0) {
-//       return res.status(404).json({ error: 'La Tribu no tiene repositorios que cumplan con la cobertura necesaria' });
-//     }
-
-//      // filtrar los repositorios por cobertura
-//      const filteredRepositories = repositories.filter(repo => {
-//       // obtener el estado de verificación del repositorio desde una API simulada (mock)
-//       const verificationStatus = getVerificationStatusFromApi(repo.id);
-//       return repo.coverage > 75 && verificationStatus === 'Verified';
+// export const tribeExists = async (req: Request, res: Response) => {
+//   const specificTribeId = req.params.tribeId;
+//   const tribe = await Trybe.findOne({
+//     where: {
+//       id_tribe: specificTribeId,
+//     },
 //   });
-
-//   // si no se encuentran repositorios que cumplan con la cobertura, retornar un error
-//   if (filteredRepositories.length === 0) {
-//       return res.status(404).json({ error: 'La Tribu no tiene repositorios que cumplan con la cobertura necesaria' });
+//   if (!tribe) {
+//     return res.status(404).json({
+//       message: "La Tribu no se encuentra registrada",
+//     });
 //   }
-
-//   // retornar los detalles de las métricas de los repositorios
-//   return res.json({
-//       tribe: tribe.name,
-//       repositories: filteredRepositories.map(repo => ({
-//           name: repo.name,
-//           coverage: repo.coverage,
-//           verificationStatus: getVerificationStatusFromApi(repo.id)
-//       }))
-//   });
-// });
-
-
-// export const repositoriPorTribu = async (req: Request, res: Response) => {
-//     // obtener el id de la tribu desde el parámetro de la ruta
-//     const { id } = req.params;
-
-//     // buscar la tribu en la base de datos
-//     const tribe = await Trybe.findByPk(id);
-
-//     // si la tribu no existe, retornar un error
-//     if (!tribe) {
-//         return res.status(404).json({ error: 'La Tribu no se encuentra registrada' });
-//     }
-
-//     // obtener los repositorios de la tribu
-//     const repositories = await Repository.findAll({
+//   const repositories = await Repository.findAll({
+//     include: [
+//       {
+//         model: Trybe,
+//         required: true,
 //         where: {
-//             id_tribe: id,
-//             state: 'E',
-//             create_time: { [Op.gte]: new Date(new Date().getFullYear(), 0, 1) }
+//           id_tribe: specificTribeId,
 //         },
-//         include: [{
-//             model: Trybe,
-//             attributes: ['name']
-//         }]
-//     });
-
-//     // si no se encuentran repositorios, retornar un error
-//     if (repositories.length === 0) {
-//         return res.status(404).json({ error: 'La Tribu no tiene repositorios que cumplan con la cobertura necesaria' });
-//     }
-
-//     // filtrar los repositorios por cobertura
-//     const filteredRepositories = repositories.filter(repo => {
-//         // obtener el estado de verificación del repositorio desde una API simulada (mock)
-//         const verificationStatus =  getVerificationStatusFromApi(repo.id);
-//         return repo.coverge >= 75 && verificationStatus === 'Verified';
-//     });
-
-//     // si no se encuentran repositorios que cumplan con la cobertura, retornar un error
-//     if (filteredRepositories.length === 0) {
-//         return res.status(404).json({ error: 'La Tribu no tiene repositorios que cumplan con la cobertura necesaria' });
-//     }
-
-//     // retornar los detalles de las métricas de los repositorios
-//     return res.json({
-//         tribe: tribe.name,
-//         repositories: filteredRepositories.map(repo => ({
-//             name: repo.name,
-//             coverage: repo.coverge,
-//             verificationStatus: getVerificationStatusFromApi(repo.id)
-//         }))
-//     });
-// }
-
-// function getVerificationStatusFromApi(repoId: number): string {
-//     // aquí deberías colocar la lógica para obtener el estado de verificación desde una API simulada (mock)
-//     return 'Verified';
-// }
-
-
-
+//       },
+//     ],
+//   });
+//   return res.status(200).json(repositories);
+// };

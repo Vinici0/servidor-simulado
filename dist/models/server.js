@@ -31,11 +31,8 @@ class Server {
         };
         this.app = (0, express_1.default)();
         this.port = process.env.PORT || '8000';
-        //Conectar a base de datos
         this.dbConnection();
-        //Definir middlewares
         this.milddlewares();
-        //Definir rutas
         this.routes();
     }
     dbConnection() {
@@ -51,13 +48,10 @@ class Server {
             }
         });
     }
-    //Son funciones que se ejecutan antes de que lleguen a las rutas
     milddlewares() {
         //CORS
         this.app.use((0, cors_1.default)());
-        //Lectura y parseo del body
         this.app.use(express_1.default.json());
-        //Directorio publico
         this.app.use(express_1.default.static('public'));
     }
     routes() {
