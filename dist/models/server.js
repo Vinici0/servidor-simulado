@@ -20,17 +20,15 @@ const connection_1 = __importDefault(require("../db/connection"));
 require("./matric");
 require("./organization");
 require("./tribe");
-require("./usuario");
 require("./repository");
 class Server {
     constructor() {
         this.apiPaths = {
-            usuarios: '/api/usuarios',
             organizationPath: '/api/organizations',
             tribePath: '/api/tribes',
         };
         this.app = (0, express_1.default)();
-        this.port = process.env.PORT || '8000';
+        this.port = process.env.PORT || '8110';
         this.dbConnection();
         this.milddlewares();
         this.routes();

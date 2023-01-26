@@ -1,1 +1,1 @@
-{"version":3,"file":"tribes.js","sourceRoot":"","sources":["../../routes/tribes.ts"],"names":[],"mappings":";;AAAA,qCAAiC;AACjC,sEAAsE;AAEtE,kDAA8D;AAE9D,MAAM,MAAM,GAAG,IAAA,gBAAM,GAAE,CAAC;AAExB,MAAM,CAAC,GAAG,CAAC,WAAW,EAAE,+BAAsB,CAAC,CAAC;AAEhD,kBAAe,MAAM,CAAC"}
+{"version":3,"file":"tribes.js","sourceRoot":"","sources":["../../routes/tribes.ts"],"names":[],"mappings":";;AAAA,qCAAiC;AACjC,sEAAsE;AAEtE,kDAA8D;AAC9D,4DAA8D;AAE9D,MAAM,MAAM,GAAG,IAAA,gBAAM,GAAE,CAAC;AAExB,MAAM,CAAC,GAAG,CAAC,WAAW,EAAE,CAAC,8BAAgB,CAAC,EAAE,+BAAsB,CAAC,CAAC;AAEpE,kBAAe,MAAM,CAAC"}

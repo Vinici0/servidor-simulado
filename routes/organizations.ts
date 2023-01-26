@@ -21,7 +21,6 @@ router.get(
   '/:id',
   [
     check('id').custom(exiteOrganizacionPorId),
-    checkBodyAndQuery('id').isUUID(),
     validarCampos,
   ],
   getOrganization
@@ -38,7 +37,6 @@ router.put(
   [
     check('id').custom(exiteOrganizacionPorId),
     check('name', 'El nombre es obligatorio').not().isEmpty(),
-    checkBodyAndQuery('id').isUUID(),
     validarCampos,
   ],
   putOrganizacion
@@ -48,7 +46,6 @@ router.delete(
   '/:id',
   [
     check('id').custom(exiteOrganizacionPorId),
-    checkBodyAndQuery('id').isUUID(),
     validarCampos,
   ],
   deleteOrganizacion

@@ -18,8 +18,9 @@ const tribe_1 = __importDefault(require("../models/tribe"));
 const axios_1 = __importDefault(require("axios"));
 const repository_1 = __importDefault(require("../models/repository"));
 const matric_1 = __importDefault(require("../models/matric"));
-const apiUrl = "http://localhost:8006/api/repositories";
+const apiUrl = "http://localhost:8006/api/status";
 const getRepositoriesByTribe = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    //recuperar los nombre de organizaciones
     try {
         const { tribeId } = req.params;
         let tribe = yield tribe_1.default.findOne({
@@ -27,11 +28,6 @@ const getRepositoriesByTribe = (req, res) => __awaiter(void 0, void 0, void 0, f
                 id_tribe: tribeId,
             },
         });
-        if (!tribe) {
-            return res.status(404).json({
-                message: "La Tribu no se encuentra registrada",
-            });
-        }
         const currentYear = new Date().getFullYear();
         const repositories = yield repository_1.default.findAll({
             where: {
@@ -56,29 +52,58 @@ const getRepositoriesByTribe = (req, res) => __awaiter(void 0, void 0, void 0, f
             return repositories.map((repo) => {
                 return {
                     id_repository: repo.dataValues.id_repository,
-                    name: repo.dataValues.name,
+                    trybe: repo.dataValues.name,
                     state: repo.dataValues.state,
                     create_time: repo.dataValues.create_time,
                     status: repo.dataValues.status,
-                    metrics: repo.dataValues.metrics,
                 };
             });
         });
-        const { name } = repositories[0];
+        //recuperar los datos de metricas
+        const metrics = yield matric_1.default.findAll({
+            where: {
+                id_repository: {
+                    [sequelize_1.Op.in]: repositories.map((repo) => repo.id_repository),
+                },
+            },
+        });
+        const metricsData = metrics.map((metric) => {
+            return {
+                id_repository: metric.dataValues.id_repository,
+                coverge: metric.dataValues.coverge,
+                vulnerabilities: metric.dataValues.vulnerabilities,
+                hostpost: metric.dataValues.hostpost,
+                bugs: metric.dataValues.bugs,
+                name: metric.dataValues.name,
+                codeSmells: metric.dataValues.codeSmells,
+            };
+        });
+        const { vulnerabilities, hostpost, bugs, codeSmells, coverge } = metricsData[0];
+        if (!repositories || repositories.length === 0) {
+            return res.status(404).json({
+                message: "La Tribu no tiene repositorios que cumplan con la cobertura necesaria",
+            });
+        }
+        // repositories.length === 0? name = 'No hay repositorios': name = repositories[0].name
         const { data } = yield axios_1.default.get(apiUrl);
+        if (!data) {
+            return res.status(404).json({
+                message: "No se encontraron datos en la API de verificación",
+            });
+        }
         const repositoriesData = data.filter((r) => repositories.find((repo) => repo.id_repository === r.id));
         const updatedRepositories = repositoriesData.map((repo) => {
             const verificationStatus = verificationStatuses.find((status) => status.code === repo.state);
-            return Object.assign(Object.assign({}, repo), { verificationSate: verificationStatus
+            return Object.assign(Object.assign({}, repo), { verificationStatus: verificationStatus
                     ? verificationStatus.description
                     : "Desconocido" });
         });
-        const verificationSate = updatedRepositories[0].verificationSate;
-        //desestructurar el objeto tribe
-        const { id_tribe, state, create_time, status } = tribe.dataValues;
-        tribe = Object.assign(Object.assign({ name: name }, tribe.dataValues), { verificationSate });
+        const verificationStatus = updatedRepositories[0].verificationStatus;
+        console.log(verificationStatus);
+        const repositoriess = Object.assign(Object.assign({ tribe: tribe === null || tribe === void 0 ? void 0 : tribe.dataValues.name }, tribe === null || tribe === void 0 ? void 0 : tribe.dataValues), { verificationStatus,
+            vulnerabilities, hostpost, bugs, codeSmells, coverge });
         return res.status(200).json({
-            tribe,
+            repositoriess
         });
     }
     catch (error) {
@@ -103,29 +128,4 @@ const verificationStatuses = [
         description: "Aprobado",
     },
 ];
-// export const tribeExists = async (req: Request, res: Response) => {
-//   const specificTribeId = req.params.tribeId;
-//   const tribe = await Trybe.findOne({
-//     where: {
-//       id_tribe: specificTribeId,
-//     },
-//   });
-//   if (!tribe) {
-//     return res.status(404).json({
-//       message: "La Tribu no se encuentra registrada",
-//     });
-//   }
-//   const repositories = await Repository.findAll({
-//     include: [
-//       {
-//         model: Trybe,
-//         required: true,
-//         where: {
-//           id_tribe: specificTribeId,
-//         },
-//       },
-//     ],
-//   });
-//   return res.status(200).json(repositories);
-// };
 //# sourceMappingURL=tribes.js.map

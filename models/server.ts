@@ -6,21 +6,19 @@ import db from '../db/connection';
 import './matric';
 import './organization';
 import './tribe';
-import './usuario';
 import './repository';
 
 class Server {
-  private app: Application;
+  public app: Application;
   private port: string;
   private apiPaths = {
-    usuarios: '/api/usuarios',
     organizationPath: '/api/organizations',
     tribePath: '/api/tribes',
   };
 
   constructor() {
     this.app = express();
-    this.port = process.env.PORT || '8000';
+    this.port = process.env.PORT || '8110';
 
     this.dbConnection();
 
