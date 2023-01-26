@@ -10,7 +10,6 @@ const Repository = connection_1.default.define('repository', {
     id_repository: {
         type: sequelize_1.DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
     },
     name: {
         type: sequelize_1.DataTypes.STRING,

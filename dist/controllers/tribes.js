@@ -64,14 +64,19 @@ const getRepositoriesByTribe = (req, res) => __awaiter(void 0, void 0, void 0, f
                 };
             });
         });
+        const { name } = repositories[0];
         const { data } = yield axios_1.default.get(apiUrl);
         const repositoriesData = data.filter((r) => repositories.find((repo) => repo.id_repository === r.id));
         const updatedRepositories = repositoriesData.map((repo) => {
             const verificationStatus = verificationStatuses.find((status) => status.code === repo.state);
-            return Object.assign(Object.assign({}, repo), { verificationSate: verificationStatus ? verificationStatus.description : 'Desconocido' });
+            return Object.assign(Object.assign({}, repo), { verificationSate: verificationStatus
+                    ? verificationStatus.description
+                    : "Desconocido" });
         });
         const verificationSate = updatedRepositories[0].verificationSate;
-        tribe = Object.assign(Object.assign({}, tribe.dataValues), { verificationSate });
+        //desestructurar el objeto tribe
+        const { id_tribe, state, create_time, status } = tribe.dataValues;
+        tribe = Object.assign(Object.assign({ name: name }, tribe.dataValues), { verificationSate });
         return res.status(200).json({
             tribe,
         });

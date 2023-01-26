@@ -73,6 +73,7 @@ export const getRepositoriesByTribe = async (req: Request, res: Response) => {
         };
       });
     });
+    const { name } = repositories[0];
 
     const { data } = await axios.get<ExternalRepositoryData[]>(apiUrl);
 
@@ -81,19 +82,26 @@ export const getRepositoriesByTribe = async (req: Request, res: Response) => {
     );
 
     const updatedRepositories = repositoriesData.map((repo) => {
-      const verificationStatus = verificationStatuses.find((status) => status.code === repo.state);
+      const verificationStatus = verificationStatuses.find(
+        (status) => status.code === repo.state
+      );
       return {
         ...repo,
-        verificationSate: verificationStatus ? verificationStatus.description : 'Desconocido'
-      }
+        verificationSate: verificationStatus
+          ? verificationStatus.description
+          : "Desconocido",
+      };
     });
 
-    const verificationSate = updatedRepositories[0].verificationSate
+    const verificationSate = updatedRepositories[0].verificationSate;
+    //desestructurar el objeto tribe
+    const { id_tribe, state, create_time, status } = tribe.dataValues;
 
     tribe = {
+      name: name,
       ...tribe.dataValues,
-      verificationSate
-    }
+      verificationSate,
+    };
 
     return res.status(200).json({
       tribe,
@@ -120,7 +128,6 @@ const verificationStatuses: VerificationStatus[] = [
     description: "Aprobado",
   },
 ];
-
 
 // export const tribeExists = async (req: Request, res: Response) => {
 //   const specificTribeId = req.params.tribeId;

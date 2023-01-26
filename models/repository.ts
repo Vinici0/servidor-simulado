@@ -6,7 +6,6 @@ const Repository = db.define('repository', {
   id_repository: {
     type: DataTypes.INTEGER,
     primaryKey: true,
-    autoIncrement: true,
   },
   name: {
     type: DataTypes.STRING,
