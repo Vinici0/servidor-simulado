@@ -6,6 +6,7 @@ import axios from "axios";
 import Repository from "../models/repository";
 import Metrics from "../models/matric";
 import Organization from "../models/organization";
+import Tribe from "../models/tribe";
 
 const apiUrl = "http://localhost:8006/api/status";
 
@@ -25,6 +26,8 @@ interface RepositoryData {
   vulnerabilities?: number;
   hostpost?: number;
   bugs?: number;
+  code_smells?: number;
+  name?: string;
 }
 
 interface VerificationStatus {
@@ -33,9 +36,6 @@ interface VerificationStatus {
 }
 
 export const getRepositoriesByTribe = async (req: Request, res: Response) => {
-
-
-  //recuperar los nombre de organizaciones
   try {
     const { tribeId } = req.params;
     let tribe = await Trybe.findOne({
@@ -73,13 +73,16 @@ export const getRepositoriesByTribe = async (req: Request, res: Response) => {
           state: repo.dataValues.state,
           create_time: repo.dataValues.create_time,
           status: repo.dataValues.status,
+          name: repo.dataValues.name,
         };
       });
     });
 
+    //Si state es E = Enable, D = Disable, A = Archive
+    let {state, id_repository} = repositories[0];
+    if (state === "E") state = "Enable";
 
 
-    //recuperar los datos de metricas
     const metrics = await Metrics.findAll({
       where: {
         id_repository: {
@@ -95,23 +98,19 @@ export const getRepositoriesByTribe = async (req: Request, res: Response) => {
         hostpost: metric.dataValues.hostpost,
         bugs: metric.dataValues.bugs,
         name: metric.dataValues.name,
-        codeSmells: metric.dataValues.codeSmells,
-
+        code_smells: metric.dataValues.code_smells,
       };
     });
 
-    const {vulnerabilities, hostpost, bugs, codeSmells, coverge} = metricsData[0];
-
+    const { vulnerabilities, hostpost, bugs, code_smells, coverge } =
+      metricsData[0];
 
     if (!repositories || repositories.length === 0) {
       return res.status(404).json({
-        message: "La Tribu no tiene repositorios que cumplan con la cobertura necesaria",
+        message:
+          "La Tribu no tiene repositorios que cumplan con la cobertura necesaria",
       });
-
     }
-
-    // repositories.length === 0? name = 'No hay repositorios': name = repositories[0].name
-
     const { data } = await axios.get<ExternalRepositoryData[]>(apiUrl);
     if (!data) {
       return res.status(404).json({
@@ -138,17 +137,55 @@ export const getRepositoriesByTribe = async (req: Request, res: Response) => {
     const verificationStatus = updatedRepositories[0].verificationStatus;
     console.log(verificationStatus);
 
+    const organization = await Organization.findOne({
+      where: {
+        id_organizacion: tribe?.dataValues.id_organizacion,
+      },
+    });
+
+    const { name} = tribe?.dataValues;
 
     const repositoriess = {
-      tribe: tribe?.dataValues.name,
-      ...tribe?.dataValues,
+      id:id_repository,
+      tribe: name,
       verificationStatus,
-      vulnerabilities, hostpost, bugs, codeSmells, coverge
+      organization: organization?.dataValues.name,
+      vulnerabilities,
+      hostpost,
+      bugs,
+      code_smells,
+      coverge,
+      state
     };
 
     return res.status(200).json({
-      repositoriess
-  });
+      repositoriess,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error al obtener los repositorios de la tribu",
+      error,
+    });
+  }
+};
+
+export const getRepositoriesByTribes = async (req: Request, res: Response) => {
+  try {
+    const { tribeId } = req.params;
+    const repositories = await Repository.findAll({
+
+      where: {
+        id_tribe: tribeId,
+      },
+      include: [{
+          model: Trybe,
+          include: [Organization]
+      }]
+    });
+
+    return res.status(200).json({
+      repositories,
+    });
   } catch (error) {
     return res.status(500).json({
       message: "Error al obtener los repositorios de la tribu",

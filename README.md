@@ -8,3 +8,6 @@ npm start o nodemon .\dist\app <br>
 
 **Ejecutar el proyecto en typescript - opcional** <br>
 tsc -w <br>
+
+
+BAAMBOOZLE.COM/INDEX.PHP.GAME/844177

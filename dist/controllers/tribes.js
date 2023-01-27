@@ -12,15 +12,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRepositoriesByTribe = void 0;
+exports.getRepositoriesByTribes = exports.getRepositoriesByTribe = void 0;
 const sequelize_1 = require("sequelize");
 const tribe_1 = __importDefault(require("../models/tribe"));
 const axios_1 = __importDefault(require("axios"));
 const repository_1 = __importDefault(require("../models/repository"));
 const matric_1 = __importDefault(require("../models/matric"));
+const organization_1 = __importDefault(require("../models/organization"));
 const apiUrl = "http://localhost:8006/api/status";
 const getRepositoriesByTribe = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //recuperar los nombre de organizaciones
     try {
         const { tribeId } = req.params;
         let tribe = yield tribe_1.default.findOne({
@@ -59,7 +59,10 @@ const getRepositoriesByTribe = (req, res) => __awaiter(void 0, void 0, void 0, f
                 };
             });
         });
-        //recuperar los datos de metricas
+        //Si state es E = Enable, D = Disable, A = Archive
+        let { state, id_repository } = repositories[0];
+        if (state === "E")
+            state = "Enable";
         const metrics = yield matric_1.default.findAll({
             where: {
                 id_repository: {
@@ -75,16 +78,15 @@ const getRepositoriesByTribe = (req, res) => __awaiter(void 0, void 0, void 0, f
                 hostpost: metric.dataValues.hostpost,
                 bugs: metric.dataValues.bugs,
                 name: metric.dataValues.name,
-                codeSmells: metric.dataValues.codeSmells,
+                code_smells: metric.dataValues.code_smells,
             };
         });
-        const { vulnerabilities, hostpost, bugs, codeSmells, coverge } = metricsData[0];
+        const { vulnerabilities, hostpost, bugs, code_smells, coverge } = metricsData[0];
         if (!repositories || repositories.length === 0) {
             return res.status(404).json({
                 message: "La Tribu no tiene repositorios que cumplan con la cobertura necesaria",
             });
         }
-        // repositories.length === 0? name = 'No hay repositorios': name = repositories[0].name
         const { data } = yield axios_1.default.get(apiUrl);
         if (!data) {
             return res.status(404).json({
@@ -100,10 +102,26 @@ const getRepositoriesByTribe = (req, res) => __awaiter(void 0, void 0, void 0, f
         });
         const verificationStatus = updatedRepositories[0].verificationStatus;
         console.log(verificationStatus);
-        const repositoriess = Object.assign(Object.assign({ tribe: tribe === null || tribe === void 0 ? void 0 : tribe.dataValues.name }, tribe === null || tribe === void 0 ? void 0 : tribe.dataValues), { verificationStatus,
-            vulnerabilities, hostpost, bugs, codeSmells, coverge });
+        const organization = yield organization_1.default.findOne({
+            where: {
+                id_organizacion: tribe === null || tribe === void 0 ? void 0 : tribe.dataValues.id_organizacion,
+            },
+        });
+        const { name } = tribe === null || tribe === void 0 ? void 0 : tribe.dataValues;
+        const repositoriess = {
+            id: id_repository,
+            tribe: name,
+            verificationStatus,
+            organization: organization === null || organization === void 0 ? void 0 : organization.dataValues.name,
+            vulnerabilities,
+            hostpost,
+            bugs,
+            code_smells,
+            coverge,
+            state
+        };
         return res.status(200).json({
-            repositoriess
+            repositoriess,
         });
     }
     catch (error) {
@@ -114,6 +132,30 @@ const getRepositoriesByTribe = (req, res) => __awaiter(void 0, void 0, void 0, f
     }
 });
 exports.getRepositoriesByTribe = getRepositoriesByTribe;
+const getRepositoriesByTribes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { tribeId } = req.params;
+        const repositories = yield repository_1.default.findAll({
+            where: {
+                id_tribe: tribeId,
+            },
+            include: [{
+                    model: tribe_1.default,
+                    include: [organization_1.default]
+                }]
+        });
+        return res.status(200).json({
+            repositories,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            message: "Error al obtener los repositorios de la tribu",
+            error,
+        });
+    }
+});
+exports.getRepositoriesByTribes = getRepositoriesByTribes;
 const verificationStatuses = [
     {
         code: 604,
