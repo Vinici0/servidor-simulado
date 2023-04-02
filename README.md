@@ -10,9 +10,9 @@ Este proyecto es un ejemplo básico de cómo crear un CRUD utilizando Node.js y 
 
 Para utilizar este proyecto, primero debes clonar el repositorio desde GitHub. Luego, debes instalar las dependencias ejecutando el siguiente comando en tu terminal:
 
-```bash
+```
 npm install
-
+```
 ## Uso
 
 Para ejecutar el proyecto, debes ejecutar el siguiente comando en tu terminal:<br>
