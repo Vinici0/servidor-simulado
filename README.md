@@ -32,12 +32,10 @@ http://localhost:8080
 - dotenv
 - express
 - express-validator
+- mongoose
 
 ## Licencia<br>
 Este proyecto está bajo la Licencia ISC. Ver el archivo LICENSE para más detalles.<br>
-
-Espero que esto sea útil para ti. ¡Buena suerte con tu proyecto!
-- mongoose
 
 ## Contribuyendo<br>
 
