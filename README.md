@@ -22,7 +22,7 @@ npm start
 Luego, podrás acceder a la aplicación desde tu navegador web utilizando la siguiente URL:<br>
 
 ```
-http://localhost:3000
+http://localhost:8080
 ```
 
 ## Dependencias<br>
