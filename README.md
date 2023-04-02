@@ -1,7 +1,5 @@
 # Proyecto de CRUD en Node.js con base de datos MongoDB
 
-[![GitHub license](https://img.shields.io/github/license/tuusuario/tuproyecto.svg)](https://github.com/tuusuario/tuproyecto/blob/main/LICENSE)
-
 ## Descripción
 
 Este proyecto es un ejemplo básico de cómo crear un CRUD utilizando Node.js y una base de datos MongoDB. El proyecto consta de cuatro tablas y las operaciones CRUD correspondientes.
@@ -34,12 +32,10 @@ http://localhost:8080
 - express-validator
 - mongoose
 
-## Licencia<br>
-Este proyecto está bajo la Licencia ISC. Ver el archivo LICENSE para más detalles.<br>
+## Autor
+Este proyecto ha sido desarrollado por Vinico Borja. Si tienes alguna duda o sugerencia, no dudes en contactar conmigo.
 
-## Contribuyendo<br>
+## Contacto
 
-Si deseas contribuir a este proyecto, por favor, crea un pull request explicando los cambios que deseas realizar.
-
-Espero que esto sea útil para ti. ¡Buena suerte con tu proyecto!
+Si tienes alguna pregunta o comentario sobre este proyecto, no dudes en contactarme a través de mi perfil de [LinkedIn](https://www.linkedin.com/in/vinicio-borja/).
 
