@@ -1,4 +1,4 @@
-# Proyecto de CRUD en Node.js con base de datos MongoDB
+# Proyecto de CRUD en NodeJS con base de datos MongoDB
 
 ## Descripción
 
