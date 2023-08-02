@@ -1,4 +1,4 @@
-# Proyecto de CRUD en NodeJS con base de datos PostgreSQL
+# NodeJS con base de datos PostgreSQL
 
 ## Descripción
 
