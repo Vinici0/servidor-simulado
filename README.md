@@ -1,8 +1,8 @@
-# Proyecto de CRUD en NodeJS con base de datos MongoDB
+# Proyecto de CRUD en NodeJS con base de datos PostgreSQL
 
 ## Descripción
 
-Este proyecto es un ejemplo básico de cómo crear un CRUD utilizando Node.js y una base de datos MongoDB. El proyecto consta de cuatro tablas y las operaciones CRUD correspondientes.
+Este proyecto es un ejemplo básico de cómo crear un CRUD utilizando Node.js y una base de datos PostgreSQL. El proyecto consta de cuatro tablas y las operaciones CRUD correspondientes.
 
 ## Instalación
 
@@ -30,7 +30,6 @@ http://localhost:8080
 - dotenv
 - express
 - express-validator
-- mongoose
 
 ## Contacto
 
